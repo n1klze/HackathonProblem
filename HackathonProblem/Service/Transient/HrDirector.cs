@@ -8,11 +8,11 @@ public class HrDirector
     {
         var teamLeadsDesiredJuniors = teamLeadsWishlists.ToDictionary(t => t.EmployeeId, t => t.DesiredEmployees);
         var juniorsDesiredTeamLeads = juniorsWishlists.ToDictionary(j => j.EmployeeId, j => j.DesiredEmployees);
-    
+
         var n = teams.Count() * 2;
         double sum = 0;
 
-        foreach (var t in teams) 
+        foreach (var t in teams)
         {
             sum += 1.0 / CountSatisfaction(t.TeamLead.Id, juniorsDesiredTeamLeads[t.Junior.Id]);
             sum += 1.0 / CountSatisfaction(t.Junior.Id, teamLeadsDesiredJuniors[t.TeamLead.Id]);

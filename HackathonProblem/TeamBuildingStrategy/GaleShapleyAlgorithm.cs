@@ -11,7 +11,7 @@ public class GaleShapleyAlgorithm : ITeamBuildingStrategy
     {
         var teamLeadsList = teamLeads.ToList();
         var juniorsList = juniors.ToList();
-        
+
         var freeJuniorsQueue = new Queue<int>(juniors.Select(j => j.Id));
         var teamLeadsDesiredJuniors = teamLeadsWishlists.ToDictionary(w => w.EmployeeId, w => w.DesiredEmployees);
         var juniorsDesiredTeamLeads = juniorsWishlists.ToDictionary(w => w.EmployeeId, w => w.DesiredEmployees);
