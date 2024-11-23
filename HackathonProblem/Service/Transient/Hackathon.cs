@@ -1,10 +1,11 @@
 using HackathonProblem.Contracts;
+using HackathonProblem.Utils.RandomExtension;
 
 namespace HackathonProblem.Service.Transient;
 
-public class Hackathon 
+public class Hackathon
 {
-    public (IEnumerable<Wishlist> teamLeadsWishlists, IEnumerable<Wishlist> juniorsWishlists) Organize(IEnumerable<Employee> teamLeads, IEnumerable<Employee> juniors)
+    public (IEnumerable<Wishlist> teamLeadsWishlists, IEnumerable<Wishlist> juniorsWishlists) GenerateWishlists(IEnumerable<Employee> teamLeads, IEnumerable<Employee> juniors)
     {
         var teamLeadsWishlists = new List<Wishlist>();
         var juniorsWishlists = new List<Wishlist>();
@@ -23,22 +24,15 @@ public class Hackathon
             teamLeadsWishlists.Add(new Wishlist(l.Id, juniorsList.Select(j => j.Id).ToArray()));
         }
 
-        return (teamLeadsWishlists, juniorsWishlists);        
+        return (teamLeadsWishlists, juniorsWishlists);
     }
-}
 
-public static class RandomExtension
-{
-    private static readonly Random _random = new();
-
-    public static void Shuffle<T>(this IList<T> list)
+    public double Run(IEnumerable<Employee> teamLeads, IEnumerable<Employee> juniors, HrManager hrManager, HrDirector hrDirector)
     {
-        var n = list.Count;
-        while (n > 1)
-        {
-            var i = _random.Next(n);
-            --n;
-            (list[i], list[n]) = (list[n], list[i]);
-        }
+        var (teamLeadsWishlists, juniorsWishlists) = GenerateWishlists(teamLeads, juniors);
+        var teams = hrManager.BuildTeams(teamLeads, juniors, teamLeadsWishlists, juniorsWishlists);
+        var satisfactionIndex = hrDirector.CalculateSatisfactionIndex(teams, teamLeadsWishlists, juniorsWishlists);
+
+        return satisfactionIndex;
     }
 }

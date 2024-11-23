@@ -1,7 +1,7 @@
 using HackathonProblem.Service.Transient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using HackathonProblem.CsvExtension;
+using HackathonProblem.Utils.CsvExtension;
 
 namespace HackathonProblem.Service;
 
@@ -27,9 +27,7 @@ public class HackathonWorker(
         double totalSatisfaction = 0;
         for (var i = 0; i < _numberOfHackathons; ++i)
         {
-            var (teamLeadsWishlists, juniorsWishlists) = hackathon.Organize(teamLeads, juniors);
-            var teams = hrManager.BuildTeams(teamLeads, juniors, teamLeadsWishlists, juniorsWishlists);
-            var satisfactionIndex = hrDirector.CalculateSatisfactionIndex(teams, teamLeadsWishlists, juniorsWishlists);
+            var satisfactionIndex = hackathon.Run(teamLeads, juniors, hrManager, hrDirector);
             totalSatisfaction += satisfactionIndex;
             Console.WriteLine($"{i + 1} : Satisfaction index is {satisfactionIndex}");
         }

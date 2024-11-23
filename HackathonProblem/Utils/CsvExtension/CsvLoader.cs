@@ -1,6 +1,6 @@
 using HackathonProblem.Contracts;
 
-namespace HackathonProblem.CsvExtension;
+namespace HackathonProblem.Utils.CsvExtension;
 
 public static class CsvLoader
 {
