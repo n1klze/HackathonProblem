@@ -2,6 +2,7 @@ using HackathonProblem.Service.Transient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using HackathonProblem.Utils.CsvExtension;
+using HackathonProblem.Settings;
 
 namespace HackathonProblem.Service;
 
@@ -13,26 +14,26 @@ public class HackathonWorker(
     IConfiguration configuration
 ) : IHostedService
 {
-    private readonly int _numberOfHackathons = configuration.GetValue<int>("NumberOfHackathons");
-    private readonly string _teamLeadsSample = configuration["Samples:TeamLeads"] 
-        ?? throw new InvalidOperationException("Path to file with team leads sample must be set.");
-    private readonly string _juniorsSample = configuration["Samples:Juniors"] 
-        ?? throw new InvalidOperationException("Path to file with juniors sample must be set."); 
-
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        var teamLeads = CsvLoader.Load(_teamLeadsSample);
-        var juniors = CsvLoader.Load(_juniorsSample);
+        HackathonData hackathonData = configuration.GetSection("Hackathon").Get<HackathonData>()
+            ?? throw new InvalidOperationException("Hackathon section must be set in appsettings file.");
+
+        SamplesData samplesData = configuration.GetSection("Samples").Get<SamplesData>()
+            ?? throw new InvalidOperationException("Samples section must be set in appsettings file.");
+
+        var teamLeads = CsvLoader.Load(samplesData.TeamLeads);
+        var juniors = CsvLoader.Load(samplesData.Juniors);
 
         double totalSatisfaction = 0;
-        for (var i = 0; i < _numberOfHackathons; ++i)
+        for (var i = 0; i < hackathonData.Number; ++i)
         {
             var satisfactionIndex = hackathon.Run(teamLeads, juniors, hrManager, hrDirector);
             totalSatisfaction += satisfactionIndex;
             Console.WriteLine($"{i + 1} : Satisfaction index is {satisfactionIndex}");
         }
 
-        Console.WriteLine($"Average satisfaction index after {_numberOfHackathons} hackathons is {totalSatisfaction / _numberOfHackathons}");
+        Console.WriteLine($"Average satisfaction index after {hackathonData.Number} hackathons is {totalSatisfaction / hackathonData.Number}");
 
         applicationLifetime.StopApplication();
         return Task.CompletedTask;
