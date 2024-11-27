@@ -15,20 +15,18 @@ public class HackathonWorker(
     IConfiguration configuration
 ) : IHostedService
 {
+    private readonly HackathonData hackathonData =
+        configuration.GetSection("Hackathon").Get<HackathonData>()
+        ?? throw new InvalidOperationException(
+            "Hackathon section must be set in appsettings file."
+        );
+
+    private readonly SamplesData samplesData =
+        configuration.GetSection("Samples").Get<SamplesData>()
+        ?? throw new InvalidOperationException("Samples section must be set in appsettings file.");
+
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        HackathonData hackathonData =
-            configuration.GetSection("Hackathon").Get<HackathonData>()
-            ?? throw new InvalidOperationException(
-                "Hackathon section must be set in appsettings file."
-            );
-
-        SamplesData samplesData =
-            configuration.GetSection("Samples").Get<SamplesData>()
-            ?? throw new InvalidOperationException(
-                "Samples section must be set in appsettings file."
-            );
-
         var teamLeads = CsvLoader.Load(samplesData.TeamLeads);
         var juniors = CsvLoader.Load(samplesData.Juniors);
 
