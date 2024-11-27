@@ -15,7 +15,8 @@ public static class CsvLoader
             while (!reader.EndOfStream)
             {
                 var line = reader.ReadLine();
-                if (line == null) break;
+                if (line == null)
+                    break;
                 var values = line.Split(';');
 
                 int id = int.Parse(values[0]);

@@ -4,17 +4,25 @@ namespace HackathonProblem.TeamBuildingStrategy;
 
 public class GaleShapleyAlgorithm : ITeamBuildingStrategy
 {
-    public IEnumerable<Team> BuildTeams(IEnumerable<Employee> teamLeads,
+    public IEnumerable<Team> BuildTeams(
+        IEnumerable<Employee> teamLeads,
         IEnumerable<Employee> juniors,
         IEnumerable<Wishlist> teamLeadsWishlists,
-        IEnumerable<Wishlist> juniorsWishlists)
+        IEnumerable<Wishlist> juniorsWishlists
+    )
     {
         var teamLeadsList = teamLeads.ToList();
         var juniorsList = juniors.ToList();
 
         var freeJuniorsQueue = new Queue<int>(juniors.Select(j => j.Id));
-        var teamLeadsDesiredJuniors = teamLeadsWishlists.ToDictionary(w => w.EmployeeId, w => w.DesiredEmployees);
-        var juniorsDesiredTeamLeads = juniorsWishlists.ToDictionary(w => w.EmployeeId, w => w.DesiredEmployees);
+        var teamLeadsDesiredJuniors = teamLeadsWishlists.ToDictionary(
+            w => w.EmployeeId,
+            w => w.DesiredEmployees
+        );
+        var juniorsDesiredTeamLeads = juniorsWishlists.ToDictionary(
+            w => w.EmployeeId,
+            w => w.DesiredEmployees
+        );
 
         var teamLeadIdToJuniorIdPair = new Dictionary<int, int>();
 
@@ -28,7 +36,13 @@ public class GaleShapleyAlgorithm : ITeamBuildingStrategy
                 if (teamLeadIdToJuniorIdPair.TryGetValue(dt, out var selectedJuniorId))
                 {
                     var desiredJuniors = teamLeadsDesiredJuniors[dt];
-                    if (!PrefersCurrenMoreThanSelectedOne(currentJuniorId, selectedJuniorId, desiredJuniors))
+                    if (
+                        !PrefersCurrenMoreThanSelectedOne(
+                            currentJuniorId,
+                            selectedJuniorId,
+                            desiredJuniors
+                        )
+                    )
                     {
                         continue;
                     }
@@ -42,11 +56,17 @@ public class GaleShapleyAlgorithm : ITeamBuildingStrategy
             }
         }
 
-        return teamLeadIdToJuniorIdPair.Select(e => MakeTeam(e.Value, e.Key, juniorsList, teamLeadsList));
+        return teamLeadIdToJuniorIdPair.Select(e =>
+            MakeTeam(e.Value, e.Key, juniorsList, teamLeadsList)
+        );
     }
 
-    private static Team MakeTeam(int juniorId, int teamLeadId, IEnumerable<Employee> juniors,
-        IEnumerable<Employee> teamleads)
+    private static Team MakeTeam(
+        int juniorId,
+        int teamLeadId,
+        IEnumerable<Employee> juniors,
+        IEnumerable<Employee> teamleads
+    )
     {
         var junior = juniors.First(j => j.Id == juniorId);
         var teamLead = teamleads.First(t => t.Id == teamLeadId);
@@ -54,8 +74,11 @@ public class GaleShapleyAlgorithm : ITeamBuildingStrategy
         return new Team(teamLead, junior);
     }
 
-    private static bool PrefersCurrenMoreThanSelectedOne(in int currentJuniorId, in int selectedJuniorId,
-        in int[] desiredJuniors)
+    private static bool PrefersCurrenMoreThanSelectedOne(
+        in int currentJuniorId,
+        in int selectedJuniorId,
+        in int[] desiredJuniors
+    )
     {
         foreach (var dj in desiredJuniors)
         {
