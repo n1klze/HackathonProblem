@@ -1,4 +1,5 @@
 ﻿using HackathonProblem.Contracts;
+using HackathonProblem.SatisfactionCalculationMethod;
 using HackathonProblem.Service;
 using HackathonProblem.Service.Transient;
 using HackathonProblem.TeamBuildingStrategy;
@@ -15,6 +16,7 @@ var host = Host.CreateDefaultBuilder(args)
             services.AddTransient<HrManager>();
             services.AddTransient<HrDirector>();
             services.AddTransient<WishlistGenerator>();
+            services.AddTransient<ISatisfactionCalculationMethod, HarmonicMeanCalculator>();
         }
     )
     .Build();

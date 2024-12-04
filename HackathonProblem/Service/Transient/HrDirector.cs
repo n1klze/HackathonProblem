@@ -2,7 +2,7 @@ using HackathonProblem.Contracts;
 
 namespace HackathonProblem.Service.Transient;
 
-public class HrDirector
+public class HrDirector(ISatisfactionCalculationMethod calculator)
 {
     public double CalculateSatisfactionIndex(
         IEnumerable<Team> teams,
@@ -19,16 +19,20 @@ public class HrDirector
             j => j.DesiredEmployees
         );
 
-        var n = teams.Count() * 2;
-        double sum = 0;
+        var values = (
+            from t in teams
+            let teamLeadSatisfaction = CountSatisfaction(
+                t.Junior.Id,
+                teamLeadsDesiredJuniors[t.TeamLead.Id]
+            )
+            let juniorSatisfaction = CountSatisfaction(
+                t.TeamLead.Id,
+                juniorsDesiredTeamLeads[t.Junior.Id]
+            )
+            select new List<int>([teamLeadSatisfaction, juniorSatisfaction])
+        ).SelectMany(e => e);
 
-        foreach (var t in teams)
-        {
-            sum += 1.0 / CountSatisfaction(t.TeamLead.Id, juniorsDesiredTeamLeads[t.Junior.Id]);
-            sum += 1.0 / CountSatisfaction(t.Junior.Id, teamLeadsDesiredJuniors[t.TeamLead.Id]);
-        }
-
-        return n / sum;
+        return calculator.calculate(values);
     }
 
     private static int CountSatisfaction(int employeeId, int[] desiredEmployees)
