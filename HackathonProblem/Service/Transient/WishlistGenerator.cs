@@ -10,6 +10,11 @@ public class WishlistGenerator
         IEnumerable<Wishlist> juniorsWishlists
     ) Generate(IEnumerable<Employee> teamLeads, IEnumerable<Employee> juniors)
     {
+        if (teamLeads.Count() != juniors.Count())
+        {
+            throw new ArgumentException("Number of team leads and juniors should be equal.");
+        }
+
         var teamLeadsWishlists = new List<Wishlist>();
         var juniorsWishlists = new List<Wishlist>();
 
