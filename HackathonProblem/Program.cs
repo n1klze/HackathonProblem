@@ -29,6 +29,9 @@ var host = Host.CreateDefaultBuilder(args)
                         + "Password=admin"
                 );
             });
+            services.AddTransient<EmployeeLoader>();
+            services.AddTransient<AvgSatisfactionCalculator>();
+            services.AddTransient<HackathonPrinter>();
         }
     )
     .Build();

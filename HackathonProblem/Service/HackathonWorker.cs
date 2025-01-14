@@ -8,11 +8,11 @@ namespace HackathonProblem.Service;
 
 public class HackathonWorker(
     Hackathon hackathon,
-    WishlistGenerator wishlistGenerator,
-    HrManager hrManager,
-    HrDirector hrDirector,
     IHostApplicationLifetime applicationLifetime,
-    IConfiguration configuration
+    IConfiguration configuration,
+    EmployeeLoader employeeLoader,
+    AvgSatisfactionCalculator avgSatisfactionCalculator,
+    HackathonPrinter hackathonPrinter
 ) : IHostedService
 {
     private readonly HackathonData hackathonData =
@@ -21,14 +21,9 @@ public class HackathonWorker(
             "Hackathon section must be set in appsettings file."
         );
 
-    private readonly SamplesData samplesData =
-        configuration.GetSection("Samples").Get<SamplesData>()
-        ?? throw new InvalidOperationException("Samples section must be set in appsettings file.");
-
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        var teamLeads = CsvLoader.Load(samplesData.TeamLeads);
-        var juniors = CsvLoader.Load(samplesData.Juniors);
+        employeeLoader.Load();
 
         while (true)
         {
@@ -45,18 +40,41 @@ public class HackathonWorker(
             {
                 case "1":
                 {
-                    Console.WriteLine("1");
+                    var hackathonId = hackathon.Run();
+                    Console.WriteLine($"Hackathon ID: {hackathonId}");
                     break;
                 }
                 case "2":
                 {
-                    Console.WriteLine("2");
+                    Console.WriteLine("Enter the hackathon ID");
+                    Console.Write("> ");
+                    var stringGuid = Console.ReadLine();
+                    try
+                    {
+                        var id = Guid.Parse(stringGuid);
+                        hackathonPrinter.Print(id);
+                    }
+                    catch (ArgumentNullException)
+                    {
+                        Console.WriteLine("The string to be parsed is null.");
+                    }
+                    catch (FormatException)
+                    {
+                        Console.WriteLine($"Bad format: {stringGuid}");
+                    }
                     break;
                 }
                 case "3":
                 {
-                    Console.WriteLine("3");
+                    Console.WriteLine(
+                        $"Average satisfaction index for all hackathons is {avgSatisfactionCalculator.calculate()}"
+                    );
                     break;
+                }
+                case "q":
+                {
+                    applicationLifetime.StopApplication();
+                    return Task.CompletedTask;
                 }
                 default:
                 {
@@ -66,29 +84,6 @@ public class HackathonWorker(
                 }
             }
         }
-
-        /*
-        double totalSatisfaction = 0;
-        for (var i = 0; i < hackathonData.Number; ++i)
-        {
-            var satisfactionIndex = hackathon.Run(
-                teamLeads,
-                juniors,
-                wishlistGenerator,
-                hrManager,
-                hrDirector
-            );
-            totalSatisfaction += satisfactionIndex;
-            Console.WriteLine($"{i + 1} : Satisfaction index is {satisfactionIndex}");
-        }
-        
-        Console.WriteLine(
-            $"Average satisfaction index after {hackathonData.Number} hackathons is {totalSatisfaction / hackathonData.Number}"
-        );
-        */
-
-        applicationLifetime.StopApplication();
-        return Task.CompletedTask;
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

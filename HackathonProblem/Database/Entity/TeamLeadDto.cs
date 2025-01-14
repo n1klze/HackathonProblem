@@ -1,3 +1,3 @@
 namespace HackathonProblem.Database.Entity;
 
-public class TeamLead : Employee { }
+public class TeamLeadDto : EmployeeDto { }
